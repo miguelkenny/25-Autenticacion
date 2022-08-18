@@ -2,6 +2,10 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 
+function isAuthenticated(req, res, next) {
+    req.isAuthenticated() ? next() : res.redirect('/')
+}
+
 router.get('/', (req, res) => {
     res.render('index')
 })
@@ -17,14 +21,21 @@ router.post('/register', passport.authenticate('local-register', {
 }))
 
 router.get('/login', (req, res) => {
-
+    res.render('login')
 })
 
-router.post('/login', (req, res) => {
+router.post('/login', passport.authenticate('local-login', {
+    successRedirect: '/profile',
+    failureRedirect: '/login',
+    passReqToCallback: true
+}))
 
+router.get('/logout', (req, res) => {
+    req.logout()
+    res.redirect('/')
 })
 
-router.get('/profile', (req, res) => {
+router.get('/profile', isAuthenticated, (req, res) => {
     res.render('profile')
 })
 
